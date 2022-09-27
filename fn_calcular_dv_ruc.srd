@@ -1,0 +1,62 @@
+global type fn_calcular_dv_ruc from function_object
+end type
+
+forward prototypes
+global function integer fn_calcular_dv_ruc (string vruc, integer vbase_max)
+end prototypes
+
+global function integer fn_calcular_dv_ruc (string vruc, integer vbase_max);// Funcion para calcular el digito verificador de un ruc - py
+// @author en PL/SQL: www.set.gov.py
+// @author en Power Builder: Robert Galeano - www.sistepar.com
+/*
+	ARGUMENTOS
+	Arg1(string): vruc: numero de cedula o numero de ruc sin dv
+	Arg2(integer): vbase_max: numero max que puede obtener el digito verificador
+	Return: retorna el numero de digito verificador
+*/
+
+
+double vnuevo_ruc_aux = 0
+double vresto
+long i1
+long k = 2
+string vnuevo_ruc
+string vletra_ruc
+integer vdigito
+
+
+// generamos nuevo ruc, comprobamos si el caracter obtenido es numerico o string si es string convertimos en su valor ascii
+FOR i1 = 1 to len(vruc)
+	vletra_ruc = upper(mid(vruc,i1,1))
+	
+	IF not (vletra_ruc >= "0" and vletra_ruc <= "9") then
+		vnuevo_ruc += string(asc(vletra_ruc))
+	ELSE
+		vnuevo_ruc += vletra_ruc
+	END IF
+NEXT
+
+
+// generamos el nuevo numero de ruc aux partiendo en orden DESC de acuerdo al nuevo ruc generado, tomando cada letra en el ciclo y multiplicarlo por el acumulador k
+FOR i1 = len(vnuevo_ruc) to 1 step -1
+	IF k > vbase_max then k = 2
+	
+	vnuevo_ruc_aux += integer(mid(vnuevo_ruc,i1,1)) * k
+	k += 1
+NEXT
+
+
+// obtener el resto de la division de vnuevo_ruc_aux entre 11
+vresto = mod(vnuevo_ruc_aux, 11)
+
+
+// si el resto es mayor a 1 restamos con 11 sino igualamos a 0
+IF vresto > 1 then
+	vdigito = 11 - vresto
+ELSE
+	vdigito = 0
+END IF
+
+
+return vdigito
+end function
